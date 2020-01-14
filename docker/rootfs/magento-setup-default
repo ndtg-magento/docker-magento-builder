@@ -1,0 +1,44 @@
+#!/bin/sh
+set -e
+
+setup_static_content() {
+    minify_static_file
+
+    if [ "${MAGENTO_GENERATE_DEVELOP_MODE}" = true ]; then
+        echo "${DOCUMENT_ROOT}/bin/magento setup:static-content:deploy en_US"
+        "${DOCUMENT_ROOT}"/bin/magento setup:static-content:deploy en_US
+
+        echo "${DOCUMENT_ROOT}/bin/magento setup:static-content:deploy en_AU"
+        "${DOCUMENT_ROOT}"/bin/magento setup:static-content:deploy en_AU
+
+        echo "${DOCUMENT_ROOT}/bin/magento setup:di:compile --no-ansi"
+        "${DOCUMENT_ROOT}"/bin/magento setup:di:compile --no-ansi
+    fi
+}
+
+minify_static_file() {
+    if [ "${MAGENTO_MINIFY_STATIC_FILE}" = true ]; then
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/js/minify_files 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/js/minify_files 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/css/minify_files 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/css/minify_files 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/template/minify_html 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/template/minify_html 1
+    fi
+}
+
+default_permission() {
+    echo "find ${DOCUMENT_ROOT} -type f -exec chmod 664 {} \;"
+    find "${DOCUMENT_ROOT}" -type f -exec chmod 664 {} \;
+
+    echo "find ${DOCUMENT_ROOT} -type d -exec chmod 775 {} \;"
+    find "${DOCUMENT_ROOT}" -type d -exec chmod 775 {} \;
+
+    echo "find ${DOCUMENT_ROOT}/var ${DOCUMENT_ROOT}/pub/static ${DOCUMENT_ROOT}/pub/media -type f -exec chmod 777 {} \;"
+    find "${DOCUMENT_ROOT}"/var "${DOCUMENT_ROOT}"/pub/static "${DOCUMENT_ROOT}"/pub/media -type f -exec chmod 777 {} \;
+
+    echo "find ${DOCUMENT_ROOT}/var ${DOCUMENT_ROOT}/pub/static ${DOCUMENT_ROOT}/pub/media -type d -exec chmod 777 {} \;"
+    find "${DOCUMENT_ROOT}"/var "${DOCUMENT_ROOT}"/pub/static "${DOCUMENT_ROOT}"/pub/media -type d -exec chmod 777 {} \;
+}

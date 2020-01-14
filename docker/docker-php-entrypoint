@@ -1,0 +1,39 @@
+#!/bin/sh
+set -e
+
+run_thread() {
+    # Random number between 10 and 15
+	PROCESS=${1}
+	SLEEP_TIME=$(( $RANDOM * 12345 % 6 + 10 ))
+
+	echo "${PROCESS} will sleep for ${SLEEP_TIME} seconds."
+
+	sleep ${SLEEP_TIME}
+
+	echo "${PROCESS} sleep done! Running Process."
+
+	"${PROCESS}"
+}
+
+magento_thread() {
+	echo "sh /usr/local/bin/magento-entrypoint"
+	sh /usr/local/bin/magento-entrypoint
+
+	# Execute all init scripts
+	if [ -d /init.d ]  && [ "$(ls /init.d)" ]; then
+			for f in /init.d/*.sh; do
+					echo "sh $f"
+					sh "$f"
+			done
+	fi
+}
+
+(run_thread magento_thread) &
+
+# first arg is `-f` or `--some-option`
+if [ "${1#-}" != "$1" ]; then
+		set -- php-fpm "$@"
+fi
+
+echo "Starting php-fpm..."
+exec "$@"

@@ -1,0 +1,119 @@
+#!/bin/sh
+set -e
+
+. /rootfs/magento-setup-production
+. /rootfs/magento-crontab-installer
+. /rootfs/magento-sampledata-installer
+
+install_new_magento() {
+    HOST_DOMAIN="host.docker.internal"
+
+    if [ -z "${MAGENTO_DATABASE_PORT}" ]; then
+        MAGENTO_DATABASE_PORT=3306
+    fi
+
+    if [ -z "${MAGENTO_DATABASE_HOST}" ]; then
+        MAGENTO_DATABASE_HOST=${HOST_DOMAIN}
+    fi
+
+    if [ -z "${MAGENTO_BASE_URL}" ]; then
+        MAGENTO_BASE_URL="http://127.0.0.1"
+    else
+    	BASE_URL=${MAGENTO_BASE_URL#*//}
+        BASE_URL=${BASE_URL%/*}
+
+    	echo -e "127.0.0.1\t${BASE_URL}" >> /etc/hosts
+    fi
+
+    if [ -z "${MAGENTO_DATABASE_USER}" ]; then
+        MAGENTO_DATABASE_USER="root"
+    fi
+
+    if [ -z "${MAGENTO_ADMIN_USER}" ]; then
+        MAGENTO_ADMIN_USER="admin"
+    fi
+
+    until nc -z -v -w30 ${MAGENTO_DATABASE_HOST} ${MAGENTO_DATABASE_PORT}
+    do
+        echo "Waiting for database connection..."
+        # wait for 5 seconds before check again
+        sleep 5
+    done
+
+    echo "Installing new magento..."
+    echo "${DOCUMENT_ROOT}/bin/magento setup:install --base-url=${MAGENTO_BASE_URL} \
+        --db-host=${MAGENTO_DATABASE_HOST}:${MAGENTO_DATABASE_PORT} --db-name="${MAGENTO_DATABASE_DB}" \
+        --admin-firstname=Admin --admin-lastname=User --admin-email=admin@example.com \
+        --admin-user=${MAGENTO_ADMIN_USER} --admin-password="${MAGENTO_ADMIN_PWD}" \
+        --db-user=${MAGENTO_DATABASE_USER} --db-password="${MAGENTO_DATABASE_PWD}" \
+        --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1"
+    "${DOCUMENT_ROOT}"/bin/magento setup:install --base-url=${MAGENTO_BASE_URL} \
+        --db-host=${MAGENTO_DATABASE_HOST}:${MAGENTO_DATABASE_PORT} --db-name="${MAGENTO_DATABASE_DB}" \
+        --admin-firstname=Admin --admin-lastname=User --admin-email=admin@sstechvn.com \
+        --admin-user=${MAGENTO_ADMIN_USER} --admin-password="${MAGENTO_ADMIN_PWD}" \
+        --db-user=${MAGENTO_DATABASE_USER} --db-password="${MAGENTO_DATABASE_PWD}" \
+        --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
+
+    if [ "${MAGENTO_SAMPLEDATA_INSTALL}" = true ]; then
+        install_sampledata
+    fi
+
+    echo "${DOCUMENT_ROOT}/bin/magento deploy:mode:set ${MAGENTO_MODE} --skip-compilation"
+    "${DOCUMENT_ROOT}"/bin/magento deploy:mode:set "${MAGENTO_MODE}" --skip-compilation
+
+    if [ "${MAGENTO_MODE}" = "production" ]; then
+        minify_static_file
+    fi
+
+    install_varnish_cache
+    install_redis_cache
+    setup_crontab
+}
+
+install_redis_cache() {
+    if [ "${MAGENTO_CACHE_REDIS_HOST}" ]; then
+        echo "Installing cache..."
+
+        if [ -z "${MAGENTO_CACHE_REDIS_PORT}" ]; then
+            MAGENTO_CACHE_REDIS_PORT=6379
+        fi
+
+        until nc -z -v -w30 "${MAGENTO_CACHE_REDIS_HOST}" ${MAGENTO_CACHE_REDIS_PORT}
+        do
+            echo "Waiting for Redis connection..."
+            # wait for 2 seconds before check again
+            sleep 2
+        done
+
+        echo "${DOCUMENT_ROOT}/bin/magento setup:config:set --cache-backend=redis --cache-backend-redis-server=${MAGENTO_CACHE_REDIS_HOST} \
+                          --cache-backend-redis-port=${MAGENTO_CACHE_REDIS_PORT} --cache-backend-redis-db=0"
+        "${DOCUMENT_ROOT}"/bin/magento setup:config:set --cache-backend=redis --cache-backend-redis-server=${MAGENTO_CACHE_REDIS_HOST} \
+            --cache-backend-redis-port=${MAGENTO_CACHE_REDIS_PORT} --cache-backend-redis-db=0
+
+        echo "${DOCUMENT_ROOT}/bin/magento setup:config:set --page-cache=redis --page-cache-redis-server=${MAGENTO_CACHE_REDIS_HOST} \
+                          --cache-backend-redis-port=${MAGENTO_CACHE_REDIS_PORT} --page-cache-redis-db=1"
+        "${DOCUMENT_ROOT}"/bin/magento setup:config:set --page-cache=redis --page-cache-redis-server=${MAGENTO_CACHE_REDIS_HOST} \
+            --cache-backend-redis-port=${MAGENTO_CACHE_REDIS_PORT} --page-cache-redis-db=1
+
+        echo "yes | ${DOCUMENT_ROOT}/bin/magento setup:config:set --session-save=redis --session-save-redis-host=${MAGENTO_CACHE_REDIS_HOST} \
+                          --session-save-redis-port=${MAGENTO_CACHE_REDIS_PORT} --session-save-redis-break-after-frontend=15 \
+                          session-save-redis-timeout=5 --session-save-redis-log-level=3 --session-save-redis-db=2"
+        yes | "${DOCUMENT_ROOT}"/bin/magento setup:config:set --session-save=redis --session-save-redis-host=${MAGENTO_CACHE_REDIS_HOST} \
+            --session-save-redis-port=${MAGENTO_CACHE_REDIS_PORT} --session-save-redis-break-after-frontend=15 \
+            --session-save-redis-log-level=3 --session-save-redis-db=2
+
+        echo "Cache installed"
+    fi
+}
+
+install_varnish_cache() {
+    if [ "${VARNISH_CACHE_ENABLED}" = true ]; then
+        echo "${DOCUMENT_ROOT}/bin/magento config:set --scope=default --scope-code=0 system/full_page_cache/caching_application 2"
+        "${DOCUMENT_ROOT}"/bin/magento config:set --scope=default --scope-code=0 system/full_page_cache/caching_application 2
+
+        if [ "${VARNISH_HTTP_CACHE_HOST}" ]; then
+            echo "${DOCUMENT_ROOT}/bin/magento setup:config:set --http-cache-hosts=${VARNISH_HTTP_CACHE_HOST}"
+            "${DOCUMENT_ROOT}"/bin/magento setup:config:set --http-cache-hosts="${VARNISH_HTTP_CACHE_HOST}"
+        fi
+    fi
+}

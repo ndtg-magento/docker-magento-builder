@@ -1,0 +1,54 @@
+#!/bin/sh
+set -e
+
+setup_static_content() {
+    minify_static_file
+
+    echo "${DOCUMENT_ROOT}/bin/magento setup:static-content:deploy en_US"
+    "${DOCUMENT_ROOT}"/bin/magento setup:static-content:deploy en_US
+
+    echo "${DOCUMENT_ROOT}/bin/magento setup:static-content:deploy en_AU"
+    "${DOCUMENT_ROOT}"/bin/magento setup:static-content:deploy en_AU
+
+    echo "${DOCUMENT_ROOT}/bin/magento setup:di:compile --no-ansi"
+    "${DOCUMENT_ROOT}"/bin/magento setup:di:compile --no-ansi
+}
+
+minify_static_file() {
+    if [ "${MAGENTO_MINIFY_STATIC_FILE}" = true ]; then
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/js/enable_js_bundling 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/js/enable_js_bundling 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/js/minify_files 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/js/minify_files 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/js/merge_files 0"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/js/merge_files 0
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/css/minify_files 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/css/minify_files 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/css/merge_css_files 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/css/merge_css_files 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/template/minify_html 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/template/minify_html 1
+
+        echo "${DOCUMENT_ROOT}/bin/magento config:set dev/static/sign 1"
+        "${DOCUMENT_ROOT}"/bin/magento config:set dev/static/sign 1
+    fi
+}
+
+production_permission() {
+    echo "find ${DOCUMENT_ROOT}/app/code ${DOCUMENT_ROOT}/var/view_preprocessed ${DOCUMENT_ROOT}/vendor \
+        ${DOCUMENT_ROOT}/pub/static ${DOCUMENT_ROOT}/app/etc ${DOCUMENT_ROOT}/generated/code  \
+        ${DOCUMENT_ROOT}/generated/metadata \( -type f -or -type d \) -exec chmod g-w {} + \
+        && chmod o+rwx ${DOCUMENT_ROOT}/app/etc/env.php"
+    find "${DOCUMENT_ROOT}"/app/code "${DOCUMENT_ROOT}"/var/view_preprocessed "${DOCUMENT_ROOT}"/vendor \
+        "${DOCUMENT_ROOT}"/pub/static "${DOCUMENT_ROOT}"/app/etc "${DOCUMENT_ROOT}"/generated/code  \
+        "${DOCUMENT_ROOT}"/generated/metadata \( -type f -or -type d \) -exec chmod g-w {} + \
+        && chmod o+rwx "${DOCUMENT_ROOT}"/app/etc/env.php
+
+    echo "find ${DOCUMENT_ROOT}/var \( -type d -or -type f \) -exec chmod 777 {} +;"
+    find "${DOCUMENT_ROOT}"/var \( -type d -or -type f \) -exec chmod 777 {} +;
+}
