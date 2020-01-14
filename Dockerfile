@@ -40,9 +40,14 @@ RUN docker-php-ext-install \
     xsl \
     sockets
 
-# Install Redis Cache
-RUN pecl install redis
-RUN docker-php-ext-enable redis
+# Install Redis Cache, XDebug
+RUN pecl install \
+    redis \
+    xdebug-2.8.1
+
+RUN docker-php-ext-enable \
+    redis \
+    xdebug
 
 RUN apk del .phpize-deps \
     && apk del --no-cache \
