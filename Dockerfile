@@ -6,7 +6,6 @@ RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
 # Install Redis Cache, XDebug
 RUN pecl install xdebug-2.8.1
-
 RUN docker-php-ext-enable xdebug
 
 COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
