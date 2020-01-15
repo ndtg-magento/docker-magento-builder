@@ -21,14 +21,14 @@ magento_thread() {
 
 	# Execute all init scripts
 	if [ -d /init.d ]  && [ "$(ls /init.d)" ]; then
-			for f in /init.d/*.sh; do
-					echo "sh $f"
-					sh "$f"
-			done
+        for f in /init.d/*.sh; do
+            echo "sh $f"
+            sh "$f"
+        done
 	fi
 }
 
-(run_thread magento_thread) >/dev/null 2>&1 &
+(run_thread magento_thread) 2>&1 &
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
