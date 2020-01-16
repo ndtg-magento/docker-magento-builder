@@ -10,8 +10,9 @@
 [ntuangiang/magento](https://hub.docker.com/r/ntuangiang/magento) 
 ## Usage
 ## Developer
-1. Write a `Dockerfile` file.
-```yml
+- Write a `Dockerfile` file.
+
+```Dockerfile
 FROM ntuangiang/magento:2.3.3-develop as magento-php-fpm
 
 COPY --chown=magento:magento ./composer.* ${DOCUMENT_ROOT}/
@@ -32,8 +33,9 @@ COPY --from=magento-php-fpm \
 
 WORKDIR ${NGINX_DOCUMENT_ROOT}
 ```
-## Changing DocumentRoot
-```yml
+- Changing DocumentRoot
+
+```Dockerfile
 FROM ntuangiang/magento:2.3.3-develop as magento-php-fpm
 
 ENV MAGENTO_UPDATE_PACKAGE=true
@@ -61,8 +63,10 @@ COPY --from=magento-php-fpm \
 
 WORKDIR ${NGINX_DOCUMENT_ROOT}
 ```
-2. Write `docker-compose.env` to config container.
-```yml
+
+- Write `docker-compose.env` to config container.
+
+```env
 # XDebug
 XDEBUG_CONFIG=remote_host=host.docker.internal idekey=PHPSTORM remote_port=9000 remote_enable=1 remote_autostart=1
 
@@ -103,8 +107,9 @@ MAGENTO_MODE=developer
 #MAGENTO_MINIFY_STATIC_FILE=true
 #MAGENTO_REFRESH_ALL_PERMISSION
 ```
-3. Write `docker-compose.yml` to start services.
-```bash
+- Write `docker-compose.yml` to start services.
+
+```yml
 version: '3.7'
 
 services:
