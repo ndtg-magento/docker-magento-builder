@@ -17,7 +17,7 @@ run_thread() {
 
 magento_thread() {
 	echo "sh /usr/local/bin/magento-entrypoint"
-	sh /usr/local/bin/magento-entrypoint
+	sh /usr/local/bin/docker-magento-entrypoint
 
 	# Execute all init scripts
 	if [ -d /init.d ]  && [ "$(ls /init.d)" ]; then

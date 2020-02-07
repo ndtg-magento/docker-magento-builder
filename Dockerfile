@@ -2,7 +2,7 @@ FROM php:7.3-fpm-alpine
 
 MAINTAINER Nguyen Tuan Giang "https://github.com/ntuangiang"
 
-ENV MAGENTO_VERSION=2.3.3
+ENV MAGENTO_VERSION=2.3.5-p2
 
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
@@ -55,12 +55,13 @@ RUN apk del .phpize-deps \
 # Install Magento
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
 COPY ./docker/php/php.ini "${PHP_INI_DIR}/php.ini"
-COPY ./docker/magento-entrypoint /usr/local/bin/magento-entrypoint
+COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
+COPY ./docker/docker-magento-entrypoint /usr/local/bin/docker-magento-entrypoint
 COPY ./docker/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
 
-RUN chmod u+x /usr/local/bin/magento-entrypoint
+RUN chmod u+x /usr/local/bin/docker-magento-entrypoint
+RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
 
 WORKDIR ${DOCUMENT_ROOT}
 
@@ -70,11 +71,6 @@ RUN addgroup -S magento
 # Create a user 'appuser' under 'xyzgroup'
 RUN adduser -SD magento magento
 
-COPY ./docker/rootfs /rootfs
-
-RUN chmod u+x /rootfs/*
-
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
-RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
 
