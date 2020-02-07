@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+
+echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
+"${DOCUMENT_ROOT}"/bin/magento cache:flush
