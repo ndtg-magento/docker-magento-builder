@@ -1,5 +1,8 @@
 #!/bin/sh
 set -e
 
+. /rootfs/magento:entrypoint:template
+
+# Clear Old Config and Env
 echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
 "${DOCUMENT_ROOT}"/bin/magento cache:flush
