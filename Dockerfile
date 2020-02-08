@@ -56,12 +56,14 @@ RUN apk del .phpize-deps \
 # Install Magento
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
+# Copy Scripts
+COPY ./docker/rootfs /rootfs
 COPY ./docker/php/php.ini "${PHP_INI_DIR}/php.ini"
 COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
 COPY ./docker/docker-magento-entrypoint /usr/local/bin/docker-magento-entrypoint
 COPY ./docker/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
 
-RUN chmod u+x /usr/local/bin/docker-magento-entrypoint
+RUN chmod u+x /rootfs/* /usr/local/bin/docker-magento-entrypoint
 RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
 
 WORKDIR ${DOCUMENT_ROOT}
