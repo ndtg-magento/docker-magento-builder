@@ -28,7 +28,7 @@ magento_thread() {
 	fi
 }
 
-(run_thread magento_thread) 2>&1
+(run_thread magento_thread) 2>&1 &
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
