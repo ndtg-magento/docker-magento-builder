@@ -28,3 +28,7 @@ if [ "${MAGENTO_MINIFY_STATIC_FILE}" = true ]; then
     "${DOCUMENT_ROOT}"/bin/magento config:set dev/static/sign 1
 fi
 
+if [ "${MAGENTO_HTTP_CACHE_HOSTS}" ]; then
+    echo "${DOCUMENT_ROOT}/bin/magento setup:config:set --http-cache-hosts=${MAGENTO_HTTP_CACHE_HOSTS}"
+    "${DOCUMENT_ROOT}"/bin/magento setup:config:set --http-cache-hosts="${MAGENTO_HTTP_CACHE_HOSTS}"
+fi
