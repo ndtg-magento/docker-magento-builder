@@ -15,13 +15,8 @@ if [ -f "${MAGENTO_CONFIG_TEMPLATE}" ]; then
     fi
 fi
 
-# Wait for Env
-while [ ! -f "${MAGENTO_ENV}" ]
-do
-		echo "Waiting for ${MAGENTO_ENV}..."
-		if [ -f "${MAGENTO_ENV_TEMPLATE}" ]; then
-        		echo "cp ${MAGENTO_ENV_TEMPLATE} ${MAGENTO_ENV}"
-            cp "${MAGENTO_ENV_TEMPLATE}" "${MAGENTO_ENV}"
-    fi
-    sleep 2;
-done
+# Copy Env
+if [ -f "${MAGENTO_ENV_TEMPLATE}" ]; then
+    echo "cp ${MAGENTO_ENV_TEMPLATE} ${MAGENTO_ENV}"
+    cp "${MAGENTO_ENV_TEMPLATE}" "${MAGENTO_ENV}"
+fi
