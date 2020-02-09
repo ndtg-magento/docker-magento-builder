@@ -68,6 +68,13 @@ RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
 
 WORKDIR ${DOCUMENT_ROOT}
 
-RUN chown -R www-data:www-data ${DOCUMENT_ROOT}/
+# Create a user group 'xyzgroup'
+RUN addgroup -S magento
 
+# Create a user 'appuser' under 'xyzgroup'
+RUN adduser -SD magento magento
+
+RUN chown -R magento:magento ${DOCUMENT_ROOT}/
+
+USER magento
 
