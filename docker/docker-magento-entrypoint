@@ -8,6 +8,3 @@ set -e
 # Clear Old Config and Env
 echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
 "${DOCUMENT_ROOT}"/bin/magento cache:flush
-
-echo "rm -rf ${DOCUMENT_ROOT}/var/cache/*"
-rm -rf "${DOCUMENT_ROOT}"/var/cache/*
