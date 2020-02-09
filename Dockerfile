@@ -76,5 +76,3 @@ RUN adduser -SD magento magento
 
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
-USER magento
-
