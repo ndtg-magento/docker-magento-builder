@@ -5,9 +5,18 @@ set -e
 . /rootfs/magento:setup:production
 . /rootfs/magento:setup:crontab
 
-# Clear Old Config and Env
-echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
-"${DOCUMENT_ROOT}"/bin/magento cache:flush
+if [ -z "${MAGENTO_UPGRADE_MODULE}" ]; then
+    MAGENTO_UPGRADE_MODULE=false
+fi
+
+if [ "${MAGENTO_UPGRADE_MODULE}" = true ]; then
+    echo "${DOCUMENT_ROOT}/bin/magento setup:upgrade --keep-generated"
+    "${DOCUMENT_ROOT}"/bin/magento setup:upgrade --keep-generated
+else
+    echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
+    "${DOCUMENT_ROOT}"/bin/magento cache:flush
+fi
 
 echo "chmod -R 777 ${DOCUMENT_ROOT}/var/cache/*"
 chmod -R 777 "${DOCUMENT_ROOT}"/var/cache/*
+
