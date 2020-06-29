@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+clean_cache() {
+    echo "${DOCUMENT_ROOT}/bin/magento cache:flush"
+    "${DOCUMENT_ROOT}"/bin/magento cache:flush
+
+    echo "${DOCUMENT_ROOT}"/app/code "${DOCUMENT_ROOT}"/var/ ${DOCUMENT_ROOT}/pub/static \
+            ${DOCUMENT_ROOT}/generated \( -type d -or -type f \) -exec chmod 777 {} +;"
+    find "${DOCUMENT_ROOT}"/app/code "${DOCUMENT_ROOT}"/var/ ${DOCUMENT_ROOT}/pub/static \
+            ${DOCUMENT_ROOT}/generated \( -type d -or -type f \) -exec chmod 777 {} +;
+}

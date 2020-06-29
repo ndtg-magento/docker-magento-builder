@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+
+. /rootfs/magento:cache
+. /rootfs/magento:setup:new
+. /rootfs/magento:redis:waiter
+. /rootfs/magento:database:waiter
+. /rootfs/magento:setup:crontab
+
+MAGENTO_ENV=${DOCUMENT_ROOT}/app/etc/env.php
+MAGENTO_ENV_TEMPLATE=${DOCUMENT_ROOT}/app/etc/env.php.template
+
+while [ ! -f "${MAGENTO_ENV}" ]
+do
+		echo "Waiting for ${MAGENTO_ENV}..."
+		if [ -f "${MAGENTO_ENV_TEMPLATE}" ]; then
+				if [ ! -f "${MAGENTO_ENV}" ]; then
+        		echo "cp ${MAGENTO_ENV_TEMPLATE} ${MAGENTO_ENV}"
+            cp "${MAGENTO_ENV_TEMPLATE}" "${MAGENTO_ENV}"
+        fi
+        setup_crontab
+        clean_cache
+
+    elif [ ! -f "${MAGENTO_ENV}" ] && [ "${MAGENTO_INSTALL_NEW}" ] && [ "${MAGENTO_INSTALL_NEW}" = true ]; then
+    		install_new_magento
+    		clean_cache
+    fi
+    sleep 2;
+done
+
+echo "cp ${MAGENTO_ENV} ${MAGENTO_ENV_TEMPLATE}"
+cp "${MAGENTO_ENV}" "${MAGENTO_ENV_TEMPLATE}"
+
+wait_redis_connection
+wait_database_connection
+

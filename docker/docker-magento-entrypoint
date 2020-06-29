@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+VENDOR=${DOCUMENT_ROOT}/vendor
+
+if [ -d "${VENDOR}" ] && [ "$(ls "${VENDOR}")" ]; then
+		. /rootfs/magento:setup
+else
+		echo "${DOCUMENT_ROOT}/vendor is empty."
+fi

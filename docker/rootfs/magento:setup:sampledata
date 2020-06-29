@@ -1,0 +1,49 @@
+#!/bin/sh
+set -e
+
+install_sampledata() {
+    echo "Installing sampledata..."
+
+    echo "cp /root/.composer/auth.json ${DOCUMENT_ROOT}/var/composer_home/auth.json"
+    cp /root/.composer/auth.json "${DOCUMENT_ROOT}"/var/composer_home/auth.json
+
+    echo "${DOCUMENT_ROOT}/bin/magento deploy:mode:set developer"
+    "${DOCUMENT_ROOT}"/bin/magento deploy:mode:set developer
+
+    install
+
+    echo "${DOCUMENT_ROOT}/bin/magento setup:upgrade"
+    "${DOCUMENT_ROOT}"/bin/magento setup:upgrade
+
+    echo "Installed sampledata."
+}
+
+install() {
+    echo "${DOCUMENT_ROOT}/bin/magento sampledata:deploy >/dev/null 2>&1"
+    "${DOCUMENT_ROOT}"/bin/magento sampledata:deploy >/dev/null 2>&1 || {
+    	echo -e "composer require magento/sample-data-media \ \nmagento/module-wishlist-sample-data \ \nmagento/module-widget-sample-data \ \nmagento/module-theme-sample-data \ \nmagento/module-tax-sample-data \ \nmagento/module-swatches-sample-data \ \nmagento/module-sales-sample-data \ \nmagento/module-sales-rule-sample-data \ \nmagento/module-review-sample-data \ \nmagento/module-product-links-sample-data \ \nmagento/module-offline-shipping-sample-data \ \nmagento/module-msrp-sample-data \ \nmagento/module-grouped-product-sample-data \ \nmagento/module-downloadable-sample-data \ \nmagento/module-customer-sample-data \ \nmagento/module-configurable-sample-data \ \nmagento/module-cms-sample-data \ \nmagento/module-bundle-sample-data \ \nmagento/module-catalog-rule-sample-data \ \nmagento/module-catalog-sample-data"
+
+        composer require magento/sample-data-media \
+        magento/module-wishlist-sample-data \
+        magento/module-widget-sample-data \
+        magento/module-theme-sample-data \
+        magento/module-tax-sample-data \
+        magento/module-swatches-sample-data \
+        magento/module-sales-sample-data \
+        magento/module-sales-rule-sample-data \
+        magento/module-review-sample-data \
+        magento/module-product-links-sample-data \
+        magento/module-offline-shipping-sample-data \
+        magento/module-msrp-sample-data \
+        magento/module-grouped-product-sample-data \
+        magento/module-downloadable-sample-data \
+        magento/module-customer-sample-data \
+        magento/module-configurable-sample-data \
+        magento/module-cms-sample-data \
+        magento/module-bundle-sample-data \
+        magento/module-catalog-rule-sample-data \
+        magento/module-catalog-sample-data
+    }
+
+}
+

@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+wait_redis_connection() {
+    if [ -z "${MAGENTO_CACHE_REDIS_PORT}" ]; then
+        MAGENTO_CACHE_REDIS_PORT=6379
+    fi
+
+    until nc -z -v -w30 "${MAGENTO_CACHE_REDIS_HOST}" ${MAGENTO_CACHE_REDIS_PORT}
+    do
+        echo "Waiting for Redis connection..."
+        # wait for 2 seconds before check again
+        sleep 2
+    done
+}
+
+
+
