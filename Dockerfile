@@ -1,6 +1,4 @@
-FROM magento-2.3.5-p1
-
-RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
+FROM ntuangiang/magento-cache:2.3.5-develop
 
 RUN pecl install redis xdebug-2.9.6
 RUN docker-php-ext-enable redis xdebug
