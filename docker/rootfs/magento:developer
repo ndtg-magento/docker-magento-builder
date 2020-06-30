@@ -12,7 +12,9 @@ enable_developer_mode() {
 	echo "${DOCUMENT_ROOT}/bin/magento deploy:mode:set ${MAGENTO_MODE}"
 	"${DOCUMENT_ROOT}"/bin/magento deploy:mode:set "${MAGENTO_MODE}"
 
-	rm -rf "${DOCUMENT_ROOT}"/var/* "${DOCUMENT_ROOT}"/generated/*
+	rm -rf  "${DOCUMENT_ROOT}"/pub/static/frontend/* "${DOCUMENT_ROOT}"/pub/static/adminhtml/* \
+	"${DOCUMENT_ROOT}"/var/cache/ "${DOCUMENT_ROOT}"/var/generation/ "${DOCUMENT_ROOT}"/var/page_cache/ \
+	"${DOCUMENT_ROOT}"/var/view_preprocessed/ "${DOCUMENT_ROOT}"/var/composer_home "${DOCUMENT_ROOT}"/generated/
 
 	echo "${DOCUMENT_ROOT}/bin/magento cache:clean"
 	"${DOCUMENT_ROOT}"/bin/magento cache:clean
