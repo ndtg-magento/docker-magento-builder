@@ -18,5 +18,3 @@ RUN chmod u+x /rootfs/* /usr/local/bin/docker-magento-entrypoint
 RUN ln -s /rootfs/magento:setup /usr/local/bin/magento:setup
 RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
 RUN ln -s /rootfs/magento:install /usr/local/bin/magento:install
-
-

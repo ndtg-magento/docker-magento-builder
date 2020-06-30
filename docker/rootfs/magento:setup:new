@@ -3,6 +3,7 @@ set -e
 
 . /rootfs/magento:setup:sampledata
 . /rootfs/magento:setup:crontab
+. /rootfs/magento:developer
 
 install_new_magento() {
     HOST_DOMAIN="host.docker.internal"
@@ -18,7 +19,7 @@ install_new_magento() {
     if [ -z "${MAGENTO_BASE_URL}" ]; then
         MAGENTO_BASE_URL="http://127.0.0.1"
     else
-    	BASE_URL=${MAGENTO_BASE_URL#*//}
+    	  BASE_URL=${MAGENTO_BASE_URL#*//}
         BASE_URL=${BASE_URL%/*}
 
     	echo -e "127.0.0.1\t${BASE_URL}" >> /etc/hosts
@@ -69,6 +70,10 @@ install_new_magento() {
         --db-user=${MAGENTO_DATABASE_USER} --db-password="${MAGENTO_DATABASE_PWD}" \
         --language=en_US --currency=USD --timezone=America/Chicago --use-rewrites=1
 
+
+    echo "${DOCUMENT_ROOT}/bin/magento deploy:mode:set ${MAGENTO_MODE}"
+    "${DOCUMENT_ROOT}"/bin/magento deploy:mode:set "${MAGENTO_MODE}"
+
     if [ "${MAGENTO_SAMPLEDATA_INSTALL}" = true ]; then
         install_sampledata
     fi
@@ -76,6 +81,7 @@ install_new_magento() {
     install_varnish_cache
     install_redis_cache
     setup_crontab
+    enable_developer_mode
 }
 
 install_redis_cache() {

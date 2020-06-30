@@ -26,9 +26,11 @@ magento_thread() {
 					sh "$f"
 			done
 	fi
+
+	echo "Runing Magneto."
 }
 
-(run_thread magento_thread) >/dev/null 2>&1 &
+(run_thread magento_thread) 2>&1 &
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then

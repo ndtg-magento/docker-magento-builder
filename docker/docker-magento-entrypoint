@@ -3,8 +3,15 @@ set -e
 
 VENDOR=${DOCUMENT_ROOT}/vendor
 
-if [ -d "${VENDOR}" ] && [ "$(ls "${VENDOR}")" ]; then
-		. /rootfs/magento:setup
-else
-		echo "${DOCUMENT_ROOT}/vendor is empty."
+if [ ! -d "${VENDOR}" ] && [ -z "$(ls "${VENDOR}")" ]; then
+    echo "${DOCUMENT_ROOT}/vendor is empty."
+    . /rootfs/magento:install
 fi
+
+if [ "${MAGENTO_ALLOW_COMPOSER_INSTALL}" ] && [ "${MAGENTO_ALLOW_COMPOSER_INSTALL}" = true ]; then
+    echo "Composer install new package."
+    . /rootfs/magento:install
+fi
+
+echo "Magento 2 is setting up..."
+. /rootfs/magento:setup
