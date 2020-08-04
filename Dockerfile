@@ -2,7 +2,7 @@ FROM php:7.3-fpm-alpine
 
 MAINTAINER Nguyen Tuan Giang "https://github.com/ntuangiang"
 
-ENV MAGENTO_VERSION=2.3.3
+ENV MAGENTO_VERSION=2.3.5-p2
 
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
@@ -73,4 +73,4 @@ RUN adduser -SD magento magento
 
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
-
+RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
