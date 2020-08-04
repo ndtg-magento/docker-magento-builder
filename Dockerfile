@@ -73,4 +73,4 @@ RUN adduser -SD magento magento
 
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
-
+RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
