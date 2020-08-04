@@ -1,8 +1,8 @@
-FROM php:7.3-fpm-alpine
+FROM php:7.4-fpm-alpine
 
 MAINTAINER Nguyen Tuan Giang "https://github.com/ntuangiang"
 
-ENV MAGENTO_VERSION=2.3.5-p2
+ENV MAGENTO_VERSION=2.4.0
 
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
@@ -23,8 +23,6 @@ RUN apk add --no-cache freetype \
 RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
 RUN docker-php-ext-configure gd \
-    --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/ \
-    && docker-php-ext-configure zip --with-libzip \
     && docker-php-ext-configure intl
 
 # Install PHP package
@@ -51,9 +49,6 @@ RUN apk del .phpize-deps \
        freetype-dev \
        libjpeg-turbo-dev \
     && rm -rf /var/cache/apk/*
-
-# Install Magento
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 COPY ./docker/php/php.ini "${PHP_INI_DIR}/php.ini"
 COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
