@@ -4,7 +4,7 @@ set -e
 run_thread() {
     # Random number between 10 and 15
 	PROCESS=${1}
-	SLEEP_TIME=$(( $RANDOM * 12345 % 6 + 20 ))
+	SLEEP_TIME=$(( $RANDOM * 12345 % 6 + 5 ))
 
 	echo "${PROCESS} will sleep for ${SLEEP_TIME} seconds."
 
@@ -28,7 +28,7 @@ magento_thread() {
 	fi
 }
 
-(run_thread magento_thread) >/dev/null 2>&1 &
+(run_thread magento_thread) 2>&1 &
 
 # first arg is `-f` or `--some-option`
 if [ "${1#-}" != "$1" ]; then
