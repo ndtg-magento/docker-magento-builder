@@ -7,8 +7,10 @@ ENV MAGENTO_VERSION=2.4.0
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
 # Install package
-RUN apk add --no-cache freetype \
+RUN apk add --no-cache vim freetype \
     libpng \
+    zlib \
+    libwebp \
     libjpeg \
     libjpeg \
     libxslt \
@@ -18,11 +20,12 @@ RUN apk add --no-cache freetype \
     libpng-dev \
     libxslt-dev \
     freetype-dev \
-    libjpeg-turbo-dev
+    libjpeg-turbo-dev \
+    busybox-suid
 
 RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
-RUN docker-php-ext-configure gd \
+RUN docker-php-ext-configure gd --enable-gd --with-freetype --with-jpeg \
     && docker-php-ext-configure intl
 
 # Install PHP package
@@ -69,3 +72,5 @@ RUN adduser -SD magento magento
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
 RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
+
+USER magento

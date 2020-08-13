@@ -1,5 +1,17 @@
 #!/bin/sh
 set -e
 
-echo "${DOCUMENT_ROOT}/bin/magento setup:upgrade --keep-generated"
-"${DOCUMENT_ROOT}"/bin/magento setup:upgrade --keep-generated
+MAGENTO="${DOCUMENT_ROOT}"/bin/magento
+
+if [ -f "$MAGENTO" ]; then
+    echo "${MAGENTO} setup:upgrade --keep-generated"
+    "${MAGENTO}" setup:upgrade --keep-generated
+fi
+
+if [ "$MAGENTO_CRONTAB_ENABLED" ]; then
+    echo "${DOCUMENT_ROOT}/bin/magento cron:install 2>&1"
+    "${DOCUMENT_ROOT}"/bin/magento cron:install 2>&1
+
+    echo "${DOCUMENT_ROOT}/bin/magento cron:run 2>&1 &"
+    "${DOCUMENT_ROOT}"/bin/magento cron:run 2>&1 &
+fi
