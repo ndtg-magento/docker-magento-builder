@@ -42,8 +42,8 @@ RUN docker-php-ext-install \
     sockets
 
 # Install Redis Cache
-RUN pecl install redis
-RUN docker-php-ext-enable redis
+RUN pecl install redis xdebug
+RUN docker-php-ext-enable redis xdebug
 
 RUN apk del .phpize-deps \
     && apk del --no-cache \
@@ -74,5 +74,3 @@ RUN adduser -SD magento magento
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 
 RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
-
-USER magento
