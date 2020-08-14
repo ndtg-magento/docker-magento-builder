@@ -2,16 +2,7 @@
 set -e
 
 run_thread() {
-    # Random number between 10 and 15
 	PROCESS=${1}
-	SLEEP_TIME=$(( $RANDOM * 12345 % 6 + 5 ))
-
-	echo "${PROCESS} will sleep for ${SLEEP_TIME} seconds."
-
-	sleep ${SLEEP_TIME}
-
-	echo "${PROCESS} sleep done! Running Process."
-
 	"${PROCESS}"
 }
 
