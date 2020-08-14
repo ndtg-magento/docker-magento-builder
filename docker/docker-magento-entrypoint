@@ -1,17 +1,17 @@
 #!/bin/sh
 set -e
 
-VENDOR=${DOCUMENT_ROOT}/vendor
+MAGENTO="${DOCUMENT_ROOT}"/bin/magento
 
-if [ ! -d "${VENDOR}" ] && [ -z "$(ls "${VENDOR}")" ]; then
-    echo "${DOCUMENT_ROOT}/vendor is empty."
-    . /rootfs/magento:install
+if [ -f "$MAGENTO" ]; then
+    echo "${MAGENTO} setup:upgrade --keep-generated"
+    "${MAGENTO}" setup:upgrade --keep-generated
 fi
 
-if [ "${MAGENTO_ALLOW_COMPOSER_INSTALL}" ] && [ "${MAGENTO_ALLOW_COMPOSER_INSTALL}" = true ]; then
-    echo "Composer install new package."
-    . /rootfs/magento:install
-fi
+if [ "$MAGENTO_CRONTAB_ENABLED" ]; then
+    echo "${DOCUMENT_ROOT}/bin/magento cron:install 2>&1"
+    "${DOCUMENT_ROOT}"/bin/magento cron:install 2>&1
 
-echo "Magento 2 is setting up..."
-. /rootfs/magento:setup
+    echo "${DOCUMENT_ROOT}/bin/magento cron:run 2>&1 &"
+    "${DOCUMENT_ROOT}"/bin/magento cron:run 2>&1 &
+fi

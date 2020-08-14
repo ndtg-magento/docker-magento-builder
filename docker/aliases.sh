@@ -17,5 +17,5 @@ alias mv='mv -i'
 alias m2='$DOCUMENT_ROOT/bin/magento'
 alias mcc='m2 cache:clean'
 alias mcf='m2 cache:flush'
-alias msu='m2 setup:upgrade'
+alias msu='m2 setup:upgrade --keep-generated'
 #
