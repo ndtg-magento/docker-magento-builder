@@ -72,5 +72,6 @@ RUN addgroup -S magento
 RUN adduser -SD magento magento
 
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
+RUN chown -R magento:magento /etc/crontabs/magento
 
 RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
