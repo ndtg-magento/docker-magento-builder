@@ -71,6 +71,8 @@ RUN addgroup -S magento
 # Create a user 'appuser' under 'xyzgroup'
 RUN adduser -SD magento magento
 
+RUN mkdir /etc/crontabs/magento
+
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
 RUN chown -R magento:magento /etc/crontabs/magento
 
