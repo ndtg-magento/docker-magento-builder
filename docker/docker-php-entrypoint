@@ -1,19 +1,7 @@
 #!/bin/sh
 set -e
 
-run_thread() {
-	    # Random number between 3 and 6
-	PROCESS=${1}
-	SLEEP_TIME=$(( ($RANDOM % 5) + 2 ))
-
-	echo "${PROCESS} will sleep for ${SLEEP_TIME} seconds."
-
-	sleep ${SLEEP_TIME}
-
-	echo "${PROCESS} sleep done! Running Process."
-
-	"${PROCESS}"
-}
+. /usr/local/bin/thread
 
 magento_thread() {
 	echo "sh /usr/local/bin/magento-entrypoint"

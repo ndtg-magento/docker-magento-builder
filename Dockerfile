@@ -21,7 +21,8 @@ RUN apk add --no-cache vim freetype \
     libxslt-dev \
     freetype-dev \
     libjpeg-turbo-dev \
-    busybox-suid ssmtp
+    busybox-suid ssmtp \
+    dcron libcap
 
 RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
@@ -56,23 +57,27 @@ RUN apk del .phpize-deps \
 COPY ./docker/php/php.ini "${PHP_INI_DIR}/php.ini"
 COPY ./docker/php/ssmtp.conf /etc/ssmtp/ssmtp.conf
 
+COPY ./docker/thread.sh /usr/local/bin/thread
 COPY ./docker/aliases.sh /etc/profile.d/aliases.sh
 COPY ./docker/docker-php-entrypoint /usr/local/bin/docker-php-entrypoint
 COPY ./docker/docker-magento-entrypoint /usr/local/bin/docker-magento-entrypoint
 
+RUN addgroup magento && \
+    adduser --disabled-password --gecos "" --ingroup magento magento
+
 RUN chmod u+x /usr/local/bin/docker-magento-entrypoint
+
+RUN chown magento:magento /usr/sbin/crond /usr/bin/crontab && \
+    chown -R magento:magento /var/spool/cron /etc/crontabs
+
+RUN setcap cap_setgid=ep /usr/bin/crontab && \
+    setcap cap_setgid=ep /usr/sbin/crond
+
 RUN ln -s ${DOCUMENT_ROOT}/bin/magento /usr/local/bin/magento
+RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
 
 WORKDIR ${DOCUMENT_ROOT}
 
-# Create a user group 'xyzgroup'
-RUN addgroup -S magento
-
-# Create a user 'appuser' under 'xyzgroup'
-RUN adduser -SD magento magento
-
 RUN chown -R magento:magento ${DOCUMENT_ROOT}/
-
-RUN sed -i 's/www-data/magento/g' /usr/local/etc/php-fpm.d/*.conf
 
 USER magento
