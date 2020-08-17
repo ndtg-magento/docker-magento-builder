@@ -1,17 +1,41 @@
 #!/bin/sh
 set -e
 
+. /usr/local/bin/thread
+
 MAGENTO="${DOCUMENT_ROOT}"/bin/magento
 
-if [ -f "$MAGENTO" ]; then
-    echo "${MAGENTO} setup:upgrade --keep-generated"
-    "${MAGENTO}" setup:upgrade --keep-generated
-fi
+_start_cron() {
+    LOG_CRON=/home/magento/var/log
 
-if [ "$MAGENTO_CRONTAB_ENABLED" ]; then
-    echo "${DOCUMENT_ROOT}/bin/magento cron:install 2>&1"
-    "${DOCUMENT_ROOT}"/bin/magento cron:install 2>&1
+    echo "Create log directory ${LOG_CRON}."
+    mkdir -p $LOG_CRON
 
-    echo "${DOCUMENT_ROOT}/bin/magento cron:run 2>&1 &"
-    "${DOCUMENT_ROOT}"/bin/magento cron:run 2>&1 &
-fi
+    echo "Starting cron job..."
+    crond -fbS -L ${LOG_CRON}/cron.log
+
+    echo "Started cron job"
+}
+
+_main() {
+    MAGENTO=${1}
+
+    if [ -f "$MAGENTO" ]; then
+        echo "${MAGENTO} setup:upgrade --keep-generated"
+        "${MAGENTO}" setup:upgrade --keep-generated
+    fi
+
+    if [ "$MAGENTO_CRONTAB_ENABLED" ]; then
+        (run_thread _start_cron) 2>&1 &
+
+        echo "${DOCUMENT_ROOT}/bin/magento cron:install 2>&1"
+        "${DOCUMENT_ROOT}"/bin/magento cron:install 2>&1
+
+        echo "${DOCUMENT_ROOT}/bin/magento cron:run 2>&1 &"
+        "${DOCUMENT_ROOT}"/bin/magento cron:run 2>&1 &
+
+        sed -i 's/no crontab for/#~ no crontab for/g' /etc/crontabs/magento
+    fi
+}
+
+_main $MAGENTO
