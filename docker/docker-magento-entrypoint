@@ -5,6 +5,47 @@ set -e
 
 MAGENTO="${DOCUMENT_ROOT}"/bin/magento
 
+_service_waiting() {
+  HOST=$1
+  PORT=$2
+
+  until nc -z -v -w30 ${HOST} ${PORT}
+  do
+      note "Waiting for ${HOST}:${PORT} connection..."
+      # wait for 5 seconds before check again
+      sleep 5
+  done
+}
+
+_check_service() {
+    # Redis
+    if [ "${MAGENTO_CACHE_REDIS_HOST}" ]; then
+        if [ -z "${MAGENTO_CACHE_REDIS_PORT}" ]; then
+            MAGENTO_CACHE_REDIS_PORT=6379
+        fi
+
+        _service_waiting "${MAGENTO_CACHE_REDIS_HOST}" ${MAGENTO_CACHE_REDIS_PORT}
+    fi
+
+    # Database
+    if [ "${MAGENTO_DATABASE_HOST}" ]; then
+        if [ -z "${MAGENTO_DATABASE_PORT}" ]; then
+            MAGENTO_DATABASE_PORT=3306
+        fi
+
+        _service_waiting "${MAGENTO_DATABASE_HOST}" ${MAGENTO_DATABASE_PORT}
+    fi
+
+    # Elasticsearch
+    if [ "${MAGENTO_SEARCH_ENGINE_HOST}" ]; then
+        if [ -z "${MAGENTO_SEARCH_ENGINE_PORT}" ]; then
+            MAGENTO_SEARCH_ENGINE_PORT=9200
+        fi
+
+        _service_waiting "${MAGENTO_SEARCH_ENGINE_HOST}" ${MAGENTO_SEARCH_ENGINE_PORT}
+    fi
+}
+
 _start_cron() {
     LOG_CRON=/home/magento/var/log
 
@@ -21,6 +62,8 @@ _main() {
     MAGENTO=${1}
 
     if [ -f "$MAGENTO" ]; then
+        _check_service
+
         echo "${MAGENTO} setup:upgrade --keep-generated"
         "${MAGENTO}" setup:upgrade --keep-generated
     fi
