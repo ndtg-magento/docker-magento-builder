@@ -11,7 +11,7 @@ _service_waiting() {
 
   until nc -z -v -w30 ${HOST} ${PORT}
   do
-      note "Waiting for ${HOST}:${PORT} connection..."
+      echo "Waiting for ${HOST}:${PORT} connection..."
       # wait for 5 seconds before check again
       sleep 5
   done
