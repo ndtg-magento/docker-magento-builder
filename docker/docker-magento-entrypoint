@@ -5,7 +5,7 @@ set -e
 
 MAGENTO="${DOCUMENT_ROOT}"/bin/magento
 
-_service_waiting() {
+_waiting_service() {
   HOST=$1
   PORT=$2
 
@@ -24,7 +24,7 @@ _check_service() {
             MAGENTO_CACHE_REDIS_PORT=6379
         fi
 
-        _service_waiting "${MAGENTO_CACHE_REDIS_HOST}" ${MAGENTO_CACHE_REDIS_PORT}
+        _waiting_service "${MAGENTO_CACHE_REDIS_HOST}" ${MAGENTO_CACHE_REDIS_PORT}
     fi
 
     # Database
@@ -33,7 +33,7 @@ _check_service() {
             MAGENTO_DATABASE_PORT=3306
         fi
 
-        _service_waiting "${MAGENTO_DATABASE_HOST}" ${MAGENTO_DATABASE_PORT}
+        _waiting_service "${MAGENTO_DATABASE_HOST}" ${MAGENTO_DATABASE_PORT}
     fi
 
     # Elasticsearch
@@ -42,7 +42,7 @@ _check_service() {
             MAGENTO_SEARCH_ENGINE_PORT=9200
         fi
 
-        _service_waiting "${MAGENTO_SEARCH_ENGINE_HOST}" ${MAGENTO_SEARCH_ENGINE_PORT}
+        _waiting_service "${MAGENTO_SEARCH_ENGINE_HOST}" ${MAGENTO_SEARCH_ENGINE_PORT}
     fi
 }
 
@@ -82,3 +82,4 @@ _main() {
 }
 
 _main $MAGENTO
+
