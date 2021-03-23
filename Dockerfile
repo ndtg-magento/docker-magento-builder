@@ -2,7 +2,7 @@ FROM php:7.4-fpm-alpine
 
 MAINTAINER Nguyen Tuan Giang "https://github.com/ntuangiang"
 
-ENV MAGENTO_VERSION=2.4.0
+ENV MAGENTO_VERSION=2.4.2
 
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
