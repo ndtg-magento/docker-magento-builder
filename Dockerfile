@@ -6,6 +6,8 @@ ENV MAGENTO_VERSION=2.4.2
 
 ENV DOCUMENT_ROOT=/usr/share/nginx/html
 
+ENV ZIP_ROOT=/usr/share/nginx
+
 # Install package
 RUN apk add --no-cache vim freetype \
     libpng \
@@ -22,7 +24,7 @@ RUN apk add --no-cache vim freetype \
     freetype-dev \
     libjpeg-turbo-dev \
     busybox-suid ssmtp \
-    dcron libcap
+    dcron libcap zip unzip
 
 RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
