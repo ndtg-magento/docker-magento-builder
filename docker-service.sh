@@ -22,28 +22,35 @@ create_network() {
 }
 
 remove_mysql() {
-  docker stop mariadb-from-builder || true
-  docker rm mariadb-from-builder || true
+  MYSQL_HOST=$(get_host "$1")
+
+  docker stop "$MYSQL_HOST" || true
+  docker rm "$MYSQL_HOST" || true
 }
 
 remove_redis() {
-  docker stop redis-from-builder || true
-  docker rm redis-from-builder || true
+  REDIS_HOST=$(get_host "$1")
+
+  docker stop "$REDIS_HOST" || true
+  docker rm "$REDIS_HOST" || true
 }
 
 remove_elasticsearch() {
-  docker stop elasticsearch-from-builder || true
-  docker rm elasticsearch-from-builder || true
+  ELASTICSEARCH_HOST=$(get_host "$1")
+
+  docker stop "$ELASTICSEARCH_HOST" || true
+  docker rm "$ELASTICSEARCH_HOST" || true
 }
 
 run_mysql() {
+  MYSQL_HOST=$(get_host "$1")
   MYSQL_ROOT_PASSWORD=$2
   MYSQL_USER=$3
   MYSQL_PASSWORD=$4
   MYSQL_DATABASE=$5
 
-  remove_mysql
-  docker run --name mariadb-from-builder --network builder \
+  remove_mysql "$1"
+  docker run --name "$MYSQL_HOST" --network builder \
     --health-cmd='mysqladmin ping -h localhost --silent' \
 	  -e MYSQL_ROOT_PASSWORD="$MYSQL_ROOT_PASSWORD" \
 	  -e MYSQL_USER="$MYSQL_USER" \
@@ -53,15 +60,19 @@ run_mysql() {
 }
 
 run_redis() {
-  remove_redis
-  docker run --name redis-from-builder --network builder \
+  REDIS_HOST=$(get_host "$1")
+
+  remove_redis "$1"
+  docker run --name "$REDIS_HOST" --network builder \
     --health-cmd='redis-cli ping' \
     -d redis:alpine
 }
 
 run_elasticsearch() {
-  remove_elasticsearch
-  docker run --name elasticsearch-from-builder --network builder \
+  ELASTICSEARCH_HOST=$(get_host "$1")
+
+  remove_elasticsearch "$1"
+  docker run --name "$ELASTICSEARCH_HOST" --network builder \
     --health-cmd='localhost:9200/_cluster/health?wait_for_status=green&timeout=1s' \
     -e "discovery.type=single-node" \
     -d elasticsearch:7.10.1

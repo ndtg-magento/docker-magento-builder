@@ -14,23 +14,20 @@ MYSQL_PASSWORD="magento@123"
 MYSQL_DATABASE="magento"
 
 # Dns
-MYSQL_DNS="mariadb-from-builder:3306"
-REDIS_DNS="redis-from-builder:6379"
-ELASTICSEARCH_DNS="elasticsearch-from-builder:9200"
+MYSQL_DNS="magento-database:3306"
+REDIS_DNS="magento-redis:6379"
+ELASTICSEARCH_DNS="magento-elasticsearch:9200"
 
 # Image Tag
 CI_APPLICATION_REPOSITORY="ntuangiang/magento"
 CI_APPLICATION_TAG="2.4.3-p1"
 
 _dump_database() {
-  docker exec -it mariadb-from-builder mysqldump -u"$1" -p"$2" "$3" | gzip > magento.sql.gz
+  MAGENTO_DATABASE_HOST=$(get_host "$1")
+  docker exec -it "$MAGENTO_DATABASE_HOST" mysqldump -u"$2" -p"$3" "$4" | gzip > magento.sql.gz
 }
 
 _waiting_service_ready() {
-  HOST_DOMAIN="127.0.0.1"
-
-  PUBLIC_IP="192.168.0.155"
-
   MAGENTO_BASE_URL=$1
 
   MAGENTO_CACHE_REDIS_HOST=$(get_host "$2")
@@ -74,11 +71,11 @@ _main() {
 
   docker build -f "$DOCKERFILE_PATH" --network builder --tag "$IMAGE_PHPFPM_TAGGED" . --target "magento-phpfpm"
 
-   _dump_database $MYSQL_USER $MYSQL_PASSWORD $MYSQL_DATABASE
+   _dump_database "$4" $MYSQL_USER $MYSQL_PASSWORD $MYSQL_DATABASE
 
-  remove_mysql
-  remove_redis
-  remove_elasticsearch
+  remove_mysql "$4"
+  remove_redis "$2"
+  remove_elasticsearch "$3"
 
   docker push "$IMAGE_TAGGED"
   docker push "$IMAGE_PHPFPM_TAGGED"

@@ -23,8 +23,7 @@ RUN . /etc/environment && php -dmemory_limit=-1 bin/magento setup:install \
         --admin-lastname=$MAGENTO_ADMIN_LASTNAME \
         --admin-email=$MAGENTO_ADMIN_EMAIL \
         --admin-user=$MAGENTO_ADMIN_USER \
-        --admin-password=$MAGENTO_ADMIN_PWD \
-        --language=vi_VN --currency=VND --timezone=Asia/Ho_Chi_Minh
+        --admin-password=$MAGENTO_ADMIN_PWD
 
 RUN . /etc/environment && php -dmemory_limit=-1 bin/magento deploy:mode:set $MAGENTO_MODE --skip-compilation && \
     php -dmemory_limit=-1 bin/magento config:set dev/js/enable_js_bundling 1 && \

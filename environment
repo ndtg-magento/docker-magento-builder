@@ -1,7 +1,7 @@
 export MAGENTO_MODE=production
 
 # Database Configuration
-export MAGENTO_DATABASE_HOST=mariadb-from-builder
+export MAGENTO_DATABASE_HOST=magento-database
 export MAGENTO_DATABASE_PORT=3306
 export MAGENTO_DATABASE_USER=magento
 export MAGENTO_DATABASE_PWD=magento@123
@@ -15,13 +15,13 @@ export MAGENTO_ADMIN_PWD=magento@123
 export MAGENTO_ADMIN_EMAIL=magento@gmail.com
 
 # Cache
-export MAGENTO_CACHE_REDIS_HOST=redis-from-builder
+export MAGENTO_CACHE_REDIS_HOST=magento-redis
 
 # Search Engine
-export MAGENTO_SEARCH_ENGINE_HOST=elasticsearch-from-builder
+export MAGENTO_SEARCH_ENGINE_HOST=magento-elasticsearch
 export MAGENTO_SEARCH_ENGINE=elasticsearch7
 export MAGENTO_SEARCH_ENGINE_PORT=9200
 
 # Url
-export MAGENTO_BASE_URL=http://magento.local.dev
+export MAGENTO_BASE_URL=https://magento.local.dev
 export MAGENTO_BASE_URL_SECURE=https://magento.local.dev
