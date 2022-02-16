@@ -20,7 +20,7 @@ ELASTICSEARCH_DNS="magento-elasticsearch:9200"
 
 # Image Tag
 CI_APPLICATION_REPOSITORY="ntuangiang/magento"
-CI_APPLICATION_TAG="2.4.3-p1"
+CI_APPLICATION_TAG="2.4.3-p1-yireo"
 
 _dump_database() {
   MAGENTO_DATABASE_HOST=$(get_host "$1")
