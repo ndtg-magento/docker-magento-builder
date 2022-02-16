@@ -1,0 +1,23 @@
+export MAGENTO_MODE=developer
+
+export MAGENTO_DATABASE_HOST=neverneverdev-database
+export MAGENTO_DATABASE_PORT_NUMBER=3306
+export MAGENTO_DATABASE_USER=nevernever
+export MAGENTO_DATABASE_PASSWORD=8mGib4vFCRoqnaVZYX
+export MAGENTO_DATABASE_NAME=nevernever
+
+export MAGENTO_ADMINURI=nevernever_admin
+export MAGENTO_EMAIL=giang.nguyen@theprojectfactory.com
+export MAGENTO_FIRSTNAME=Nguyen
+export MAGENTO_LASTNAME=Giang
+export MAGENTO_PASSWORD=sDqGp4NY9xbGjWtxW
+export MAGENTO_USERNAME=giang.nguyen
+export MAGENTO_BASE_URL_SECURE=https://nevernever.sstechvn.dev
+export MAGENTO_BASE_URL=https://nevernever.sstechvn.dev
+
+export REDIS_HOST=neverneverdev-redis
+export REDIS_PORT=6379
+
+export MAGENTO_ELASTICSEARCH_ENGINE=elasticsearch7
+export MAGENTO_ELASTICSEARCH_HOST=neverneverdev-elasticsearch
+export MAGENTO_ELASTICSEARCH_PORT=9200
