@@ -23,7 +23,7 @@ CI_APPLICATION_REPOSITORY="ntuangiang/magento"
 CI_APPLICATION_TAG="2.4.3-p1"
 
 _dump_database() {
-  docker exec -it mysql-from-builder mysqldump -u"$1" -p"$2" "$3" | gzip > magento.sql.gz
+  docker exec -it mariadb-from-builder mysqldump -u"$1" -p"$2" "$3" | gzip > magento.sql.gz
 }
 
 _waiting_service_ready() {
