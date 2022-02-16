@@ -1,26 +1,29 @@
 #!/bin/bash -e
+export DOCKER_BUILDKIT=0
 
-. ./.gitlab-ci/docker-logger.sh
-. ./.gitlab-ci/docker-service.sh
+. ./docker-logger.sh
+. ./docker-service.sh
 
 # Domain
-MAGENTO_BASE_URL="dungmoc.ntugi.com"
+MAGENTO_BASE_URL="magento.local.dev"
 
 # Mysql Params
-MYSQL_ROOT_PASSWORD="tuangiang"
-MYSQL_USER="dungmoc"
-MYSQL_PASSWORD="dungmoc"
-MYSQL_DATABASE="dungmoc"
-MYSQL_DNS="production-auto-deploy.mysql-24612894-production:3306"
+MYSQL_ROOT_PASSWORD="root"
+MYSQL_USER="magento"
+MYSQL_PASSWORD="magento@123"
+MYSQL_DATABASE="magento"
 
-# Redis
-REDIS_DNS="production-auto-deploy.redis-24564346-production:6379"
+# Dns
+MYSQL_DNS="mariadb-from-builder:3306"
+REDIS_DNS="redis-from-builder:6379"
+ELASTICSEARCH_DNS="elasticsearch-from-builder:9200"
 
-# Elasticsearch
-ELASTICSEARCH_DNS="elasticsearch-filmhouse.ntugi.com:9200"
+# Image Tag
+CI_APPLICATION_REPOSITORY="ntuangiang/magento"
+CI_APPLICATION_TAG="2.4.3-p1"
 
 _dump_database() {
-  docker exec -it mysql-from-builder mysqldump -u"$1" -p"$2" "$3" | gzip > magento2.sql.gz
+  docker exec -it mysql-from-builder mysqldump -u"$1" -p"$2" "$3" | gzip > magento.sql.gz
 }
 
 _waiting_service_ready() {
@@ -39,27 +42,6 @@ _waiting_service_ready() {
   MAGENTO_DATABASE_HOST=$(get_host "$4")
   MAGENTO_DATABASE_PORT=$(get_port "$4")
 
-  if [ "${MAGENTO_BASE_URL}" != "$HOST_DOMAIN" ]; then
-    BASE_URL=${MAGENTO_BASE_URL#*//}
-    BASE_URL=${BASE_URL%/*}
-
-    echo -e "$PUBLIC_IP\t$BASE_URL" >> /etc/hosts
-  fi
-
-  if [ "$MAGENTO_DATABASE_HOST" != "$HOST_DOMAIN" ]; then
-    echo -e "$PUBLIC_IP\t$MAGENTO_DATABASE_HOST" >> /etc/hosts
-  fi
-  
-  if [ "$MAGENTO_CACHE_REDIS_HOST" != "$HOST_DOMAIN" ]; then
-    echo -e "$PUBLIC_IP\t$MAGENTO_CACHE_REDIS_HOST" >> /etc/hosts
-  fi
-
-  if [ "$MAGENTO_SEARCH_ENGINE_HOST" != "$HOST_DOMAIN" ]; then
-    echo -e "$PUBLIC_IP\t$MAGENTO_SEARCH_ENGINE_HOST" >> /etc/hosts
-  fi
-
-  cat /etc/hosts
-
   waiting_service "$MAGENTO_CACHE_REDIS_HOST" "$MAGENTO_CACHE_REDIS_PORT"
   note "[i] Redis already now."
 
@@ -74,8 +56,8 @@ _waiting_service_ready() {
 }
 
 _main() {
-  IMAGE_TAGGED="$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
-  IMAGE_PHPFPM_TAGGED="$CI_APPLICATION_REPOSITORY-phpfpm:$CI_APPLICATION_TAG"
+  IMAGE_TAGGED="$CI_APPLICATION_REPOSITORY-nginx:$CI_APPLICATION_TAG"
+  IMAGE_PHPFPM_TAGGED="$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
 
   create_network
   run_redis "$2"
@@ -92,7 +74,8 @@ _main() {
 
   docker build -f "$DOCKERFILE_PATH" --network builder --tag "$IMAGE_PHPFPM_TAGGED" . --target "magento-phpfpm"
 
-  # _dump_database $MYSQL_USER $MYSQL_PASSWORD $MYSQL_DATABASE
+   _dump_database $MYSQL_USER $MYSQL_PASSWORD $MYSQL_DATABASE
+
   remove_mysql
   remove_redis
   remove_elasticsearch
@@ -100,50 +83,6 @@ _main() {
   docker push "$IMAGE_TAGGED"
   docker push "$IMAGE_PHPFPM_TAGGED"
 }
-
-# Custom Variables
-DOCKER_USER="ntuangiang"
-
-DOCKER_PASSWORD="Thaongan12"
-
-NODE_ARCH=$([ "$CI_RUNNER_EXECUTABLE_ARCH" == "linux/arm64" ] && echo "arm64v8" || echo "amd64")
-echo "NODE_ARCH: $NODE_ARCH"
-
-if [[ -z "$CI_COMMIT_TAG" ]]; then
-    export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG}
-    export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_SHA}
-else
-    export CI_APPLICATION_REPOSITORY=${CI_APPLICATION_REPOSITORY:-$CI_REGISTRY_IMAGE}
-    export CI_APPLICATION_TAG=${CI_APPLICATION_TAG:-$CI_COMMIT_TAG}
-fi
-
-# Build stage script for Auto-DevOps
-
-if ! docker info &>/dev/null; then
-  if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
-    export DOCKER_HOST='tcp://localhost:2375'
-  fi
-fi
-
-echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-
-if [[ -n "$CI_REGISTRY" && -n "$CI_REGISTRY_USER" ]]; then
-  echo "Logging to GitLab Container Registry with CI credentials..."
-  echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-fi
-
-if [[ -n "${DOCKERFILE_PATH}" ]]; then
-  echo "Building Dockerfile-based application using '${DOCKERFILE_PATH}'..."
-else
-  export DOCKERFILE_PATH="Dockerfile"
-
-  if [[ -f "${DOCKERFILE_PATH}" ]]; then
-    echo "Building Dockerfile-based application..."
-  else
-    echo "Building Heroku-based application using gliderlabs/herokuish docker image..."
-    erb -T - /build/Dockerfile.erb > "${DOCKERFILE_PATH}"
-  fi
-fi
 
 _main "$MAGENTO_BASE_URL" $REDIS_DNS $ELASTICSEARCH_DNS $MYSQL_DNS $MYSQL_ROOT_PASSWORD $MYSQL_USER $MYSQL_PASSWORD $MYSQL_DATABASE
 
