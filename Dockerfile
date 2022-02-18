@@ -1,8 +1,13 @@
-FROM ntuangiang/magento-cache-system:2.4.3-p1 as magento-builder
+FROM ntuangiang/magento-cache-system:2.4.3-p1 as magento-phpfpm
+
+# Install Redis Cache
+RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug
 
 COPY ./composer.* ${DOCUMENT_ROOT}/
 
 RUN composer update && composer install --no-ansi --no-interaction --optimize-autoloader --no-dev --prefer-dist 2>&1
+RUN npm install -g grunt && npm install grunt && npm install
 
 COPY ./environment /etc/
 COPY ./auth.json "${DOCUMENT_ROOT}"/var/composer_home/composer.json
@@ -26,16 +31,7 @@ RUN . /etc/environment && php -dmemory_limit=-1 bin/magento setup:install \
         --admin-password=$MAGENTO_ADMIN_PWD
 
 RUN . /etc/environment && php -dmemory_limit=-1 bin/magento deploy:mode:set $MAGENTO_MODE --skip-compilation && \
-    php -dmemory_limit=-1 bin/magento config:set dev/js/enable_js_bundling 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/js/minify_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/css/minify_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/css/merge_css_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/template/minify_html 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/static/sign 1 && \
     php -dmemory_limit=-1 bin/magento setup:di:compile --no-ansi
-
-RUN php -dmemory_limit=-1 bin/magento setup:static-content:deploy && \
-    php -dmemory_limit=-1 bin/magento cache:flush
 
 COPY ./app/etc/env.php.template "${DOCUMENT_ROOT}"/app/etc/env.php
 
@@ -47,26 +43,10 @@ RUN chmod o+rwx "${DOCUMENT_ROOT}"/app/etc/env.php
 
 RUN zip -qr "${ZIP_ROOT}/magento.zip" "${DOCUMENT_ROOT}"
 
-# --- PHP FPM ---
-FROM ntuangiang/magento-system:2.4.3-p1 as magento-phpfpm
-
-COPY --from=magento-builder --chown=magento:magento \
-    "${ZIP_ROOT}/magento.zip" \
-    ${ZIP_ROOT}/
-
-# If we zip a folder, unzip will auto exact folder we zipped.
-RUN unzip -qq "${ZIP_ROOT}/magento.zip" -d "/"
-
-USER root
-
-RUN rm -rf "${ZIP_ROOT}/magento.zip"
-
-USER magento
-
 # --- NGINX SERVER ---
 FROM ntuangiang/magento-nginx-system:2.4.3-p1 as magento-nginx
 
-COPY --from=magento-builder --chown=magento:magento \
+COPY --from=magento-phpfpm --chown=magento:magento \
     "${ZIP_ROOT}/magento.zip" \
     ${ZIP_ROOT}/
 

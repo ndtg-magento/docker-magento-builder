@@ -1,4 +1,4 @@
-export MAGENTO_MODE=production
+export MAGENTO_MODE=developer
 
 # Database Configuration
 export MAGENTO_DATABASE_HOST=magento-database
