@@ -56,10 +56,10 @@ _main() {
   IMAGE_TAGGED="$CI_APPLICATION_REPOSITORY-nginx:$CI_APPLICATION_TAG"
   IMAGE_PHPFPM_TAGGED="$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
 
-#  create_network
-#  run_redis "$2"
-#  run_elasticsearch "$3"
-#  run_mysql "$4" "$5" "$6" "$7" "$8"
+  create_network
+  run_redis "$2"
+  run_elasticsearch "$3"
+  run_mysql "$4" "$5" "$6" "$7" "$8"
 
   _waiting_service_ready "$1" "$2" "$3" "$4"
 
