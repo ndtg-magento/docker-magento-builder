@@ -23,25 +23,19 @@ RUN . /etc/environment && php -dmemory_limit=-1 bin/magento setup:install \
         --admin-lastname=$MAGENTO_ADMIN_LASTNAME \
         --admin-email=$MAGENTO_ADMIN_EMAIL \
         --admin-user=$MAGENTO_ADMIN_USER \
-        --admin-password=$MAGENTO_ADMIN_PWD \
-        --language=vi_VN --currency=VND --timezone=Asia/Ho_Chi_Minh
+        --admin-password=$MAGENTO_ADMIN_PWD
 
 RUN . /etc/environment && php -dmemory_limit=-1 bin/magento deploy:mode:set $MAGENTO_MODE --skip-compilation && \
-    php -dmemory_limit=-1 bin/magento config:set dev/js/enable_js_bundling 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/js/minify_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/css/minify_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/css/merge_css_files 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/template/minify_html 1 && \
-    php -dmemory_limit=-1 bin/magento config:set dev/static/sign 1 && \
+    php -dmemory_limit=-1 bin/magento module:disable Magento_TwoFactorAuth && \
+    php -dmemory_limit=-1 bin/magento cache:flush && \
     php -dmemory_limit=-1 bin/magento setup:di:compile --no-ansi
 
 COPY ./app/etc/env.php.template "${DOCUMENT_ROOT}"/app/etc/env.php
 
 RUN mkdir -p "${DOCUMENT_ROOT}"/var/cache "${DOCUMENT_ROOT}"/var/report "${DOCUMENT_ROOT}"/var/tmp "${DOCUMENT_ROOT}"/app/code
 
-RUN find "${DOCUMENT_ROOT}"/var "${DOCUMENT_ROOT}"/generated \( -type d -or -type f \) -exec chmod 775 {} +;
-
 RUN chmod o+rwx "${DOCUMENT_ROOT}"/app/etc/env.php
+RUN chmod -R 777 "${DOCUMENT_ROOT}"/generated/ "${DOCUMENT_ROOT}"/pub "${DOCUMENT_ROOT}"/var/
 
 RUN zip -qr "${ZIP_ROOT}/magento.zip" "${DOCUMENT_ROOT}"
 
@@ -52,8 +46,8 @@ USER root
 
 RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS
 
-RUN pecl install redis xdebug-2.9.6
-RUN docker-php-ext-enable redis xdebug
+RUN pecl install xdebug-2.9.6
+RUN docker-php-ext-enable xdebug
 
 COPY --from=magento-builder \
     "${ZIP_ROOT}/magento.zip" \
